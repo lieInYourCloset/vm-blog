@@ -1,0 +1,41 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fullDate = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+}).format(post.data.pubDatetime).replaceAll("/", "-");
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/">← 返回文章列表</a>
+      <h1>{post.data.title}</h1>
+      <div class="article-meta">
+        <time datetime={post.data.pubDatetime.toISOString()}>{fullDate}</time>
+        {post.data.tags.map(tag => <span>{tag}</span>)}
+      </div>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

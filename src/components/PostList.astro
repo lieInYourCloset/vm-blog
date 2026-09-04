@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+const { posts } = Astro.props;
+
+const groupedPosts = posts.reduce<Record<string, CollectionEntry<"blog">[]>>((groups, post) => {
+  const year = String(post.data.pubDatetime.getFullYear());
+  (groups[year] ??= []).push(post);
+  return groups;
+}, {});
+
+const years = Object.keys(groupedPosts).sort((a, b) => Number(b) - Number(a));
+const formatDate = (date: Date) => new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "2-digit",
+}).format(date);
+---
+
+<div class="post-groups">
+  {years.map(year => (
+    <section class="post-group" aria-labelledby={`year-${year}`}>
+      <h2 id={`year-${year}`} class="year-heading">{year}</h2>
+      <ol class="post-list">
+        {groupedPosts[year].map(post => (
+          <li class="post-item">
+            <article>
+              <div class="post-heading-row">
+                <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
+                <time datetime={post.data.pubDatetime.toISOString()}>{formatDate(post.data.pubDatetime)}</time>
+              </div>
+              <p class="post-description">{post.data.description}</p>
+              <ul class="tag-list" aria-label="标签">
+                {post.data.tags.map(tag => <li>{tag}</li>)}
+              </ul>
+            </article>
+          </li>
+        ))}
+      </ol>
+    </section>
+  ))}
+</div>

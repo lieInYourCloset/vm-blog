@@ -1,0 +1,47 @@
+---
+import { SITE } from "../consts";
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="site-name" href="/" aria-label={`${SITE.title} 首页`}>{SITE.title}</a>
+
+    <nav class="site-nav" aria-label="主导航">
+      <a href="/#articles">文章</a>
+      <button class="theme-toggle" type="button" aria-label="切换为深色模式" title="切换颜色模式">
+        <span class="theme-icon theme-icon-light" aria-hidden="true">☼</span>
+        <span class="theme-icon theme-icon-dark" aria-hidden="true">☾</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const themeButton = document.querySelector<HTMLButtonElement>(".theme-toggle");
+
+  function updateThemeButton(theme: "light" | "dark") {
+    if (!themeButton) return;
+    const nextTheme = theme === "dark" ? "浅色" : "深色";
+    themeButton.setAttribute("aria-label", `切换为${nextTheme}模式`);
+    themeButton.setAttribute("title", `切换为${nextTheme}模式`);
+  }
+
+  function applyTheme(theme: "light" | "dark") {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    updateThemeButton(theme);
+  }
+
+  updateThemeButton(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+
+  themeButton?.addEventListener("click", () => {
+    const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", nextTheme);
+    applyTheme(nextTheme);
+  });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
+    if (!localStorage.getItem("theme")) applyTheme(event.matches ? "dark" : "light");
+  });
+</script>

@@ -1,0 +1,21 @@
+---
+import { getCollection } from "astro:content";
+import PostList from "../components/PostList.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf());
+---
+
+<BaseLayout>
+  <div class="home">
+    <section class="intro" aria-labelledby="intro-title">
+      <h1 id="intro-title">Notes on code<br />and everyday life.</h1>
+      <p>写代码，折腾系统，也记录日常。这里收集我对技术、工具和生活的阶段性思考。</p>
+    </section>
+
+    <section id="articles" aria-label="全部文章">
+      <PostList posts={posts} />
+    </section>
+  </div>
+</BaseLayout>
